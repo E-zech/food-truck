@@ -10,8 +10,7 @@ RUN apk add --no-cache \
 
 COPY flask-app /flask-app
 
-RUN npm install 
-RUN npm run build
+RUN npm install && npm run build
 
 RUN pip2 install -r requirements.txt
 

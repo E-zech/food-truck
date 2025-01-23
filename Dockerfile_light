@@ -1,0 +1,38 @@
+
+FROM alpine:3.11 AS build
+
+WORKDIR /flask-app
+
+RUN apk add --no-cache \
+    python2 \
+    py2-pip \
+    nodejs \
+    npm
+
+# Copy application files
+COPY flask-app/ .
+
+# Install Node.js dependencies and build the project
+RUN npm install && npm run build
+
+# Install Python dependencies
+RUN pip2 install -r requirements.txt
+
+# now after it's all build in our folder, we can make it light witout all the building tools and dependencies
+
+# Stage 2: Production stage
+FROM alpine:3.11
+
+WORKDIR /flask-app
+
+# Copy only the necessary files from the build stage (meaning only our folder)
+COPY --from=build /flask-app /flask-app
+
+# Install runtime dependencies
+RUN apk add --no-cache python2 py2-pip
+
+# Expose the application port
+EXPOSE 5000
+
+# Specify the command to run the application
+ENTRYPOINT ["python2", "app.py"]
