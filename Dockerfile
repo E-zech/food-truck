@@ -1,9 +1,20 @@
-FROM python2:3.11-alpine
+FROM alpine:3.11
 
-WORKDIR /app
+WORKDIR /flask-app
 
-COPY  
+RUN apk add --no-cache \
+    python2 \
+    py2-pip \
+    nodejs \
+    npm
 
-RUN
+COPY flask-app /flask-app
 
-ENTRYPOINT [ "python2", "app.py" ]
+RUN npm install 
+RUN npm run build
+
+RUN pip2 install -r requirements.txt
+
+EXPOSE 5000
+
+ENTRYPOINT ["python2", "app.py"]
