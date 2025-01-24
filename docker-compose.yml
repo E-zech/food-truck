@@ -1,0 +1,53 @@
+services:
+    elasticsearch:
+      image: elasticsearch:7.17.3
+      container_name: elasticsearch
+      volumes: 
+        - es_data:/usr/share/elasticsearch/data
+      # for it to work as a standalone cluster
+      environment:
+        - discovery.type=single-node
+      ports:
+        - "9200:9200"
+      networks: 
+        - mynet
+    
+    # reverse proxy server
+    nginx:
+      # lighter image
+      image: nginx:stable-alpine3.20-perl
+      container_name: nginx_proxy
+      # 1 for mapping nginx configuration file
+      # 2 for the static folder + index.html (include)
+      volumes:
+        - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        - ./static:/usr/share/nginx/html/static
+      # expose the container on port 80 of the host
+      ports:
+        - "80:80"  
+      depends_on:
+        - flask_foodt
+      # common network
+      networks:
+        - mynet
+
+    # flask application
+    flask_foodt:
+      build: 
+        context: .
+        dockerfile: Dockerfile_light
+      container_name: flask_foodt
+      depends_on:
+        - elasticsearch
+      # env for the elasticsearch
+      environment:
+        - ES_HOST=elasticsearch
+      ports:
+        - "5000:5000"
+      # common network
+      networks:
+        - mynet
+
+# declare a shared network for communication between services
+networks:
+  mynet: {}
