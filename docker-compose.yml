@@ -2,8 +2,6 @@ services:
     elasticsearch:
       image: elasticsearch:7.17.3
       container_name: elasticsearch
-      volumes: 
-        - es_data:/usr/share/elasticsearch/data
       # for it to work as a standalone cluster
       environment:
         - discovery.type=single-node
